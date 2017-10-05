@@ -19,7 +19,7 @@ funcs_create_figs = (create_approximating_figure_left_rectangles, create_approxi
                      create_approximating_figure_central_rectangles, create_approximating_figure_trapeze,
                      create_approximating_figure_Simpson)
 interval_num, left_border, right_border, b_interval_dot_num, s_interval_dot_num, additional_interval_koeff = \
-    10, -1, 1, 500, 100, 0
+    10, 0, 1, 500, 100, 1
 index_Gaussian = 5
 exact_val = np.float((np.arctan(2 * np.exp(right_border) / 3) - np.arctan(2 * np.exp(left_border) / 3)) / 6)
 x_vals = np.linspace(left_border - additional_interval_koeff * (right_border - left_border),
@@ -81,10 +81,6 @@ plt.plot(x_vals, norm_f(f, x_vals, left_border, right_border), 'b-', np.ones_lik
 ax.fill_between(np.linspace(-1, 1, b_interval_dot_num), np.zeros(b_interval_dot_num),
                 norm_f(f, np.linspace(-1, 1, b_interval_dot_num), left_border, right_border), color='magenta',
                 alpha=0.1)
-plt.plot(x_vals, leg.legval(x_vals, np.where(np.arange(interval_num + 2) == interval_num + 1, 1, 0)), 'k-')
-# plt.axis([x_vals.min(), x_vals.max(),
-#           np.min([f(x_vals).min(), norm_f(f, x_vals, left_border, right_border).min()]),
-#           np.max([f(x_vals).max(), norm_f(f, x_vals, left_border, right_border).max()])])
 plt.figure(7)
 plt.axis('off')
 ax = plt.subplot()

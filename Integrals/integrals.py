@@ -100,8 +100,6 @@ def Gaussian(integrand, left_b_arr, right_b_arr, N=10):
     legcoeffs = np.where(np.arange(N + 2) == N + 1, 1, 0)
     x_vals = leg.legroots(legcoeffs)
     weight_vals = 2 / (1 - x_vals**2) / (leg.legval(x_vals, leg.legder(legcoeffs)) ** 2)
-    for x in x_vals:
-        print(np.str(x) + '\n')
     for left, right in zip(left_b_arr.ravel(), right_b_arr.ravel()):
         weight = 1
         if left >= right:
