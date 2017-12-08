@@ -3,15 +3,15 @@ from ode import *
 
 
 def f(x, y):
-    return (y + x * x + y * y) / x
+    return 1 / x - 3 * y / x - x * y * y
 
 
 def y(x):
-    return x * np.tan(x - 1)
+    return (x - 1) / x ** 2 - 2 / x / (1 + np.exp(2 * x - 2))
 
 
-a, b, y_0, methods_num, exact_sol_dot_num, scale, border_dot_num, fg_size, error_num, Runge_Kutta_order = \
-    1, 2, 0, 4, 500, 0.0, 2, (15, 7.5), 2, 4
+a, b, y_0, methods_num, exact_sol_dot_num, scale, border_dot_num, fg_size, error_num = \
+    1, 2, -1, 4, 500, 0.0, 2, (15, 7.5), 2
 error_names = ("Глобальное отклонение", "Среднеквадратическое отклонение")
 methods_names = ("Метод Рунге-Кутта авт.ш.", "Метод Эйлера", "Метод Рунге-Кутта п.ш.", "Интерполяционный метод Адамса")
 col_labels = ("Номер узла", "Узлы", "Точное значение решения", "Вычисленное значение", "Локальная абсолютная погрешность")
@@ -32,8 +32,8 @@ for method_i in range(methods_num):
     sqrt_error = np.sqrt(((y(x_res_nodes) - y_res_nodes) ** 2).sum())
     global_error = (np.abs(y(x_res_nodes) - y_res_nodes)).sum()
     plt.plot(x_exact_vals, y_exact_vals, 'b-', x_res_nodes, y_res_nodes, 'r-',
-             np.ones(border_dot_num) * a, np.linspace(0, y_exact_vals.max(), border_dot_num), 'k--',
-             np.ones(border_dot_num) * b, np.linspace(0, y_exact_vals.max(), border_dot_num), 'k--')
+             np.ones(border_dot_num) * a, np.linspace(y_exact_vals.min(), y_exact_vals.max(), border_dot_num), 'k--',
+             np.ones(border_dot_num) * b, np.linspace(y_exact_vals.min(), y_exact_vals.max(), border_dot_num), 'k--')
     ax = plt.subplot()
     ax.grid(True)
     plt.figure(2 * method_i + 2, figsize=fg_size)
