@@ -63,14 +63,15 @@ def Adams_interp(f, y_0, a, b, n=10, init_val_num=5):
         a, b = b, a
     if init_val_num >= n:
         raise "Number of initial values must be lower than number of all values!"
-    x_vals, h, y_res, hyp_diff = np.linspace(a, b, n + 1), (b - a) * 1.0 / n, np.empty(n + 1), 1
+    x_vals, h, y_res = np.linspace(a, b, n + 1), (b - a) * 1.0 / n, np.empty(n + 1)
     y_res[0] = y_0
     for i in range(1, init_val_num + 1):
         y_res[i] = y_res[i - 1] + find_Runge_Kutta4_delt(f, x_vals[i - 1], y_res[i - 1], h)
     for i in range(init_val_num + 1, n + 1):
         y_res[i] = simple_iteration(lambda yi: yi - y_res[i - 1] - h *
             np.dot(all_Ak(init_val_num)[init_val_num + 1:0:-1], f(x_vals[i - init_val_num - 1:i], y_res[i - init_val_num - 1:i])) -
-            h * Ak(-1, init_val_num) * f(x_vals[i], yi), y_res[i - 1], y_res[i - 1] + hyp_diff)
+            h * Ak(-1, init_val_num) * f(x_vals[i], yi), y_res[i - 1] - 2 * find_Runge_Kutta4_delt(f, x_vals[i - 1], y_res[i - 1], h),
+            y_res[i - 1] + 2 * find_Runge_Kutta4_delt(f, x_vals[i - 1], y_res[i - 1], h))
     return [np.array(x_vals), np.array(y_res), len(x_vals) - 1]
 
 
@@ -120,6 +121,8 @@ def all_Ak(n):
 
 
 def simple_iteration(f, a, b, dot_num=1000, eps=1e-12):
+    if a > b:
+        b, a = a, b
     der_vals = derivative(lambda x: f(x), np.linspace(a, b, dot_num), dx=1e-6)
     while np.abs(np.sign(der_vals).sum()) < der_vals.size:
         if f(a) * f((a + b) / 2.0) < 0:
