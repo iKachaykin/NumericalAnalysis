@@ -1,31 +1,45 @@
 import numpy as np
 import NBodyProblem as nbp
 import matplotlib.pyplot as plt
+import RungeKutta4 as rk4
+from astropy.constants import iau2015 as constants
+from astropy.constants.codata2014 import c
 from mpl_toolkits.mplot3d import Axes3D
 
 
 if __name__ == '__main__':
 
-    p, q = np.random.randint(0, 10, (6, 3)), np.random.randint(0, 10, (6, 3))
+    figsize = (15.0, 7.5)
+    grid_dot_number = 5000
+    year_number = 5
+    body_number = 2
+    masses = np.array([float(constants.M_sun.value), float(constants.M_earth.value)])
+    momenta_initial, coordinates_initial = \
+        np.array([
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0]
+        ]), \
+        np.array([
+            [0.0, 0.0, 0.0],
+            [float(c.value) * 8 * 60, 0.0, 0.0]
+        ])
+    t0, T = 0.0, 365 * 24 * 60 * 60.0 * year_number
+    t = np.linspace(t0, T, grid_dot_number)
+    calc_eps, h_initial = 1.0, 3600
 
-    print(p, q)
-    v = nbp.momenta_and_coordinates_to_vector(p, q)
-    print(v)
-    print(nbp.vector_to_momenta_and_coordinates(v))
+    solution = rk4.solve_ode(t0, nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial), t0, T,
+                             nbp.nbody_problem_ode_right_side, calc_eps=calc_eps, h_initial=h_initial, args=1.0)
 
-    fig = plt.figure(figsize=(15.0, 7.5))
+    fig = plt.figure(figsize=figsize)
 
-    ax1 = fig.add_subplot(121, projection='3d')
-    xx, yy = np.meshgrid(np.linspace(-1.0, 1.0, 500), np.linspace(-1.0, 1.0, 500))
-    zz = xx**2 + yy**2
-    ax1.plot_wireframe(xx, yy, zz)
+    ax = fig.add_subplot(111, projection='3d')
 
-    ax2 = fig.add_subplot(122, projection='3d')
-    t = np.linspace(-10.0, 10.0, 500)
-    x = np.cos(t)
-    y = np.sin(t)
-    z = t.copy()
-    ax2.plot(x, y, z, 'r-')
+    for i in body_number:
+        x = np.cos(t)
+        y = np.sin(t)
+        z = t * np.cos(t)
+
+    ax.plot(x, y, z, 'r-')
 
     plt.show()
     plt.close()
