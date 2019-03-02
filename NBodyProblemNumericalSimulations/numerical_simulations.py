@@ -25,7 +25,7 @@ if __name__ == '__main__':
         ])
     t0, T = 0.0, 365 * 24 * 60 * 60.0 * year_number
     t = np.linspace(t0, T, grid_dot_number)
-    calc_eps, h_initial = 1.0, 3600
+    calc_eps, h_initial = 0.1, 3600
 
     solution = rk4.solve_ode(t0, nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial), t0, T,
                              nbp.nbody_problem_ode_right_side, calc_eps=calc_eps, h_initial=h_initial, args=1.0)
@@ -34,12 +34,10 @@ if __name__ == '__main__':
 
     ax = fig.add_subplot(111, projection='3d')
 
-    for i in body_number:
-        x = np.cos(t)
-        y = np.sin(t)
-        z = t * np.cos(t)
-
-    ax.plot(x, y, z, 'r-')
+    for i in range(body_number):
+        ax.plot(solution[1][body_number * nbp.number_of_dimension + 3 * i],
+                solution[1][body_number * nbp.number_of_dimension + 3 * i + 1],
+                solution[1][body_number * nbp.number_of_dimension] + 3 * i + 2, 'r-')
 
     plt.show()
     plt.close()
