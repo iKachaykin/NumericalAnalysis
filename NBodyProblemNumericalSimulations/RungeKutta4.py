@@ -9,9 +9,6 @@ def args_preprocessing(t0, x0, a, b, f, calc_eps, h_initial):
     if not (a <= t0 <= b):
         raise ValueError('t0 must be from a segment [a, b] (a <= b)')
 
-    tmp_1 = np.array(x0)
-    tmp_2 = np.array(f(t0, x0))
-
     if calc_eps < 0.0:
         raise ValueError('"calc_eps" could not be negative!')
 
