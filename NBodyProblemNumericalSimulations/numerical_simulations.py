@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import RungeKutta4 as rk4
 import matplotlib.animation as animation
 from astropy.constants import iau2015 as constants
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def init(lines_and_bodies):
