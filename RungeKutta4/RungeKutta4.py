@@ -71,8 +71,9 @@ def solve_ode(t0, x0, a, b, f, calc_eps=1e-12, h_initial=None, args=None):
         ti += hi
         xi = x_second.copy()
 
-        results_x.append(xi.copy())
-        result_t.append(ti)
+        if np.abs(result_t[-1]-ti) > min_eps:
+            results_x.append(xi.copy())
+            result_t.append(ti)
 
         if eps_full < calc_eps:
             hi *= 2
@@ -105,8 +106,9 @@ def solve_ode(t0, x0, a, b, f, calc_eps=1e-12, h_initial=None, args=None):
         ti -= hi
         xi = x_second.copy()
 
-        results_x.insert(0, xi.copy())
-        result_t.insert(0, ti)
+        if np.abs(result_t[0]-ti) > min_eps:
+            results_x.insert(0, xi.copy())
+            result_t.insert(0, ti)
 
         if eps_full < calc_eps:
             hi *= 2
