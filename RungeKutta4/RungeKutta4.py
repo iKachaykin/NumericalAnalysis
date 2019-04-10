@@ -41,7 +41,7 @@ def calculate_delta(ti, xi, hi, f, args=None):
     return (phi0 + 2 * phi1 + 2 * phi2 + phi3) / 6.0
 
 
-def solve_ode(t0, x0, a, b, f, calc_eps=1e-12, h_initial=None, args=None):
+def solve_ode(t0, x0, a, b, f, calc_eps=1e-12, h_initial=None, args=None, print_iter=False):
 
     f_tmp = convolve_args(f, args)
     args_preprocessing(t0, x0, a, b, f_tmp, calc_eps, h_initial)
@@ -74,6 +74,8 @@ def solve_ode(t0, x0, a, b, f, calc_eps=1e-12, h_initial=None, args=None):
         if np.abs(result_t[-1]-ti) > min_eps:
             results_x.append(xi.copy())
             result_t.append(ti)
+            if print_iter:
+                print('[t0, b]: %f' % ((ti - t0) / (b - t0)))
 
         if eps_full < calc_eps:
             hi *= 2
@@ -109,6 +111,8 @@ def solve_ode(t0, x0, a, b, f, calc_eps=1e-12, h_initial=None, args=None):
         if np.abs(result_t[0]-ti) > min_eps:
             results_x.insert(0, xi.copy())
             result_t.insert(0, ti)
+            if print_iter:
+                print('[a, t0]: %f' % ((t0 - ti) / (t0 - a)))
 
         if eps_full < calc_eps:
             hi *= 2
