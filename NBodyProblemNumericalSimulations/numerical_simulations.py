@@ -3,7 +3,7 @@ import NBodyProblem as nbp
 import matplotlib.pyplot as plt
 import RungeKutta4 as rk4
 import matplotlib.animation as animation
-from astropy.constants import iau2015 as constants
+from scipy.integrate import odeint
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -39,9 +39,8 @@ if __name__ == '__main__':
     lines, bodies = [], []
     colors = ('y', 'r', 'b', 'g')
     grid_dot_number = 5000
-    year_number = 2
     body_number = 4
-    scale = float(constants.M_sun.value)
+    equation_number = 2 * nbp.number_of_dimension * body_number
     masses = np.array([2*100**3, 15**3, 20**3, 8**3])
     momenta_initial, coordinates_initial = \
         np.array([
@@ -58,11 +57,15 @@ if __name__ == '__main__':
         ])
     t0, T = 0.0, 60.0 * 60
     t = np.linspace(t0, T, grid_dot_number)
-    calc_eps, h_initial = 0.000001, 1.0
+    calc_eps, h_initial = 0.0001, 1.0
 
     solution = rk4.solve_ode(t0, nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial), t0, T,
                              nbp.nbody_problem_ode_right_side, calc_eps=calc_eps, h_initial=h_initial,
-                             args=(masses, scale))
+                             args=(masses, equation_number), print_iter=False)
+
+    solution_scipy = odeint(lambda x, t: nbp.nbody_problem_ode_right_side(t, x, (masses, equation_number)),
+                            nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial),
+                            solution[0]).T
 
     fig = plt.figure(figsize=figsize)
 
@@ -90,7 +93,7 @@ if __name__ == '__main__':
                                       index),
                                   frames=np.arange(0, solution[1].shape[1], 3),
                                   init_func=lambda: init(lines_and_bodies),
-                                  interval=25)
+                                  interval=100)
 
     plt.show()
     plt.close()
