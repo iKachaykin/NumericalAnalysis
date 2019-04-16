@@ -3,7 +3,11 @@ import NBodyProblem as nbp
 import matplotlib.pyplot as plt
 import RungeKutta4 as rk4
 import matplotlib.animation as animation
+import scipy.optimize as optimize
+from time import time
 from scipy.integrate import odeint
+from scipy.integrate import quad
+from scipy.interpolate import interp1d as interp
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -33,6 +37,20 @@ def update_body(line, xdata, ydata, zdata, i):
     return line,
 
 
+def deviation(masses, t_given, x_given, t0, T, x0, calc_eps, h_initial, equation_number, print_iter):
+
+    t_current, x_current = rk4.solve_ode(t0, x0, t0, T, nbp.nbody_problem_ode_right_side, calc_eps=calc_eps,
+                                         h_initial=h_initial, args=(masses, equation_number), print_iter=print_iter)
+
+    x_given_interp, x_current_interp = \
+        interp(t_given, x_given, kind='cubic', bounds_error=False, fill_value='extrapolate') if \
+            t_given.size > 3 else interp(t_given, x_given, bounds_error=False, fill_value='extrapolate'),\
+        interp(t_current, x_current, kind='cubic', bounds_error=False, fill_value='extrapolate') if \
+            t_current.size > 3 else interp(t_current, x_current, bounds_error=False, fill_value='extrapolate')
+
+    return quad(lambda t: np.linalg.norm(x_current_interp(t) - x_given_interp(t)) ** 2, t0, T)[0]
+
+
 if __name__ == '__main__':
 
     figsize = (15.0, 7.5)
@@ -55,13 +73,18 @@ if __name__ == '__main__':
             [0.0, 4.0, 0.0],
             [0.0, 4.0, 0.11]
         ])
+    x0 = nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial)
     t0, T = 0.0, 60.0 * 60
     t = np.linspace(t0, T, grid_dot_number)
     calc_eps, h_initial = 0.0001, 1.0
+    print_iter = False
+
+    bounds = [(0, 10**7) for _ in range(body_number)]
+    time_for_optimization = 0.0
 
     solution = rk4.solve_ode(t0, nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial), t0, T,
                              nbp.nbody_problem_ode_right_side, calc_eps=calc_eps, h_initial=h_initial,
-                             args=(masses, equation_number), print_iter=False)
+                             args=(masses, equation_number), print_iter=print_iter)
 
     solution_scipy = odeint(lambda x, t: nbp.nbody_problem_ode_right_side(t, x, (masses, equation_number)),
                             nbp.momenta_and_coordinates_to_vector(momenta_initial, coordinates_initial),
@@ -94,6 +117,22 @@ if __name__ == '__main__':
                                   frames=np.arange(0, solution[1].shape[1], 3),
                                   init_func=lambda: init(lines_and_bodies),
                                   interval=100)
+
+    print('Starting optimization...')
+
+    time_for_optimization = time()
+
+    optimization_result = optimize.differential_evolution(deviation, bounds,
+                                                          args=(solution[0], solution[1], t0, T, x0, calc_eps,
+                                                                h_initial, equation_number, print_iter))
+
+    time_for_optimization = time() - time_for_optimization
+
+    masses_sol = optimization_result.x
+    print('Masses: {0}\nDeviation: {1}\nTime for optimization: {2}'
+          .format(masses_sol, deviation(masses_sol, solution[0], solution[1], t0, T, x0, calc_eps, h_initial,
+                                        equation_number, print_iter),
+                  time_for_optimization))
 
     plt.show()
     plt.close()
